@@ -1,0 +1,29 @@
+openapi: 3.1.0
+info:
+  title: Swayam 2.o AI API
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /health:
+    get:
+      summary: Health check for load balancers and uptime monitors.
+      responses:
+        '200': { description: Service is healthy }
+  /courses:
+    get:
+      summary: Search courses with natural language and faceted filters.
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+        - in: query
+          name: language
+          schema: { type: string }
+      responses:
+        '200': { description: Course search results }
+  /ai/tutor:
+    post:
+      summary: Ask the RAG-backed AI tutor for explanations, summaries, quizzes or translations.
+      responses:
+        '200': { description: AI tutor response grounded in retrieved course material }
