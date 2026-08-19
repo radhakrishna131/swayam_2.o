@@ -1,0 +1,16 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+enum Role { STUDENT INSTRUCTOR UNIVERSITY MODERATOR ADMIN SUPER_ADMIN }
+enum Difficulty { BEGINNER INTERMEDIATE ADVANCED }
+enum EnrollmentStatus { ACTIVE COMPLETED DROPPED }
+model User { id String @id @default(cuid()) email String @unique name String passwordHash String? roles Role[] @default([STUDENT]) preferredLanguage String @default("en") twoFactorEnabled Boolean @default(false) createdAt DateTime @default(now()) enrollments Enrollment[] certificates Certificate[] aiConversations AiConversation[] auditLogs AuditLog[] }
+model University { id String @id @default(cuid()) name String @unique verified Boolean @default(false) courses Course[] }
+model Course { id String @id @default(cuid()) slug String @unique title String description String language String @default("en") difficulty Difficulty certificateAvailable Boolean @default(true) pricePaise Int @default(0) rating Float @default(0) universityId String university University @relation(fields:[universityId], references:[id]) lessons Lesson[] assignments Assignment[] enrollments Enrollment[] createdAt DateTime @default(now()) }
+model Lesson { id String @id @default(cuid()) courseId String course Course @relation(fields:[courseId], references:[id]) title String videoUrl String? transcript String? durationSeconds Int order Int }
+model Enrollment { id String @id @default(cuid()) userId String courseId String status EnrollmentStatus @default(ACTIVE) progress Float @default(0) user User @relation(fields:[userId], references:[id]) course Course @relation(fields:[courseId], references:[id]) @@unique([userId, courseId]) }
+model Assignment { id String @id @default(cuid()) courseId String title String rubric Json dueAt DateTime course Course @relation(fields:[courseId], references:[id]) submissions Submission[] }
+model Submission { id String @id @default(cuid()) assignmentId String userId String fileUrl String? content String? aiFeedback Json? score Float? submittedAt DateTime @default(now()) assignment Assignment @relation(fields:[assignmentId], references:[id]) }
+model Certificate { id String @id @default(cuid()) userId String courseId String qrCodeUrl String signature String issuedAt DateTime @default(now()) user User @relation(fields:[userId], references:[id]) }
+model Notification { id String @id @default(cuid()) userId String title String body String readAt DateTime? createdAt DateTime @default(now()) }
+model AiConversation { id String @id @default(cuid()) userId String mode String messages Json retrievedChunks Json? createdAt DateTime @default(now()) user User @relation(fields:[userId], references:[id]) }
+model AuditLog { id String @id @default(cuid()) actorId String action String metadata Json createdAt DateTime @default(now()) actor User @relation(fields:[actorId], references:[id]) }
